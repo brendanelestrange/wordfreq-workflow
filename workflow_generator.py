@@ -308,7 +308,7 @@ the command it prints, or from the notebook (plan_submit()).
         nargs="+",
         default=DEFAULT_BOOKS,
         metavar="ID",
-        help="Project Gutenberg book IDs to analyze "
+        help="Project Gutenberg book IDs to analyze, space- or comma-separated "
         f"(default: {' '.join(DEFAULT_BOOKS)})",
     )
     parser.add_argument(
@@ -362,6 +362,11 @@ the command it prints, or from the notebook (plan_submit()).
     args = parser.parse_args()
 
     # --- Input validation (before any Pegasus API calls) ---
+    # Accept "11 84", "11,84" (how Pegasus AI Studio passes lists), a single
+    # quoted "11 84", or any mix.
+    args.books = [b for item in args.books for b in item.replace(",", " ").split()]
+    if not args.books:
+        parser.error("--books needs at least one Gutenberg ID")
     bad = [b for b in args.books if not b.isdigit()]
     if bad:
         parser.error(f"--books takes numeric Gutenberg IDs, got: {' '.join(bad)}")
