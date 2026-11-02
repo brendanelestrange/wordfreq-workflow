@@ -1,0 +1,4 @@
+# Submit-host dependencies (workflow generation + submission only).
+# Runtime job dependencies (matplotlib) live in the Apptainer container, NOT here.
+pegasus-wms>=5.0.0
+pyyaml>=6.0

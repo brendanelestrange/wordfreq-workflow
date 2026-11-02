@@ -1,0 +1,13 @@
+test_data/
+test_output/
+scratch/
+output/
+submit/
+*.sif
+workflow.yml
+replicas.yml
+transformations.yml
+sites.yml
+pegasus.properties
+__pycache__/
+.mplconfig/

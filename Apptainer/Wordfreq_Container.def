@@ -1,0 +1,35 @@
+# Container for the wordfreq workflow.
+#
+# count_words.py and merge_counts.py need only the Python standard library;
+# plot_top_words.py needs matplotlib.
+#
+# Build (from the project root):
+#   apptainer build Apptainer/Wordfreq_Container.sif Apptainer/Wordfreq_Container.def
+#
+# Base image: match the submit host's distribution and release where you can.
+# pegasus-lite stages the submit host's worker package into the job and, on a
+# mismatch, fetches a matching one with curl (kept below for that reason).
+# On a Debian 13 host keep python:3.13-slim-trixie; on Ubuntu 24.04 use
+# ubuntu:24.04 with apt python3 + pip (see PEGASUS.md "Worker package").
+
+Bootstrap: docker
+From: python:3.13-slim-trixie
+
+%post
+    # Unprivileged builds emulate root, and apt then fails to drop privileges
+    # to the _apt user ("setgroups: Operation not permitted"). Keep apt as root.
+    printf 'APT::Sandbox::User "root";\n' > /etc/apt/apt.conf.d/00-no-sandbox
+
+    apt-get update && \
+        apt-get install -y --no-install-recommends curl
+    rm -rf /var/lib/apt/lists/*
+
+    pip install --no-cache-dir matplotlib==3.10.3
+
+%environment
+    # Unbuffered output so job logs reach Pegasus in real time
+    export PYTHONUNBUFFERED=1
+    export MPLBACKEND=Agg
+
+%runscript
+    exec /bin/bash "$@"
